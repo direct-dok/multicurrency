@@ -1,8 +1,11 @@
 <?php
 
-use App\AppTest;
-
 require_once('vendor/autoload.php');
 
-$app_test = new AppTest();
-echo $app_test->get_name();
+use App\Account\Account;
+use App\Db\Db;
+
+$db = Db::get_instance();
+
+$result = $db->getRow('test', " where id = :id", ['id' => 1]);
+var_dump($result);
