@@ -1,0 +1,16 @@
+{
+    "name": "viktor/multicurrency-account",
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Viktor",
+            "email": "chelweb18@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {}
+}
