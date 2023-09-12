@@ -2,24 +2,19 @@
 
 namespace App\Bank;
 
-use App\Account\AccountInterface;
 use App\Bank\BankInterface;
+use App\Currency\Currency;
 
 class Bank implements BankInterface
 {
-    private $account;
+    private $accountName;
     private $currencies = [];
     protected $mainCurrency;
 
-    public function __construct(AccountInterface $account)
+    public function openNewAccount($name)
     {
-        $this->account = $account;
-    }
-
-
-    public function openNewAccount()
-    {
-
+        $this->accountName = $name;
+        return $this;
     }
 
     public function listSupportedCurrencies()
@@ -28,9 +23,14 @@ class Bank implements BankInterface
         echo '[' . implode(', ', $namesCurrencies) . ']';
     }
 
-    public function addCurrency(AbstractCurrency $currency)
+    public function addCurrency(Currency $currency)
     {
         $this->currencies[$currency->getName()] = $currency;
+    }
+
+    public function getCurrency($nameCurrency)
+    {
+        return $this->currencies[$nameCurrency];
     }
 
     public function setMainCurrency(string $nameCurrency)
@@ -40,7 +40,7 @@ class Bank implements BankInterface
 
     public function getMainCurrency()
     {
-        return $this->currencies[$this->mainCurrency];
+        return $this->mainCurrency;
     }
 
     public function disableCurrency(string $nameCurrency)
@@ -48,14 +48,44 @@ class Bank implements BankInterface
         // TODO: Implement disableCurrency() method.
     }
 
-    public function getBalance()
+    public function getBalance($nameCurrency = null)
     {
-        $currency = $this->currencies[$this->getMainCurrency()];
+        $currency = null;
 
-        if (!$currency) {
+        if ($nameCurrency) {
+            $currency = $this->currencies[$nameCurrency];
+        } else {
+            $nameCurrency = $this->getMainCurrency();
+            $currency = $this->currencies[$nameCurrency];
+        }
+
+        if (!$currency ||
+            !$currency instanceof Currency) {
             throw new \Exception();
         }
 
-        return $currency->getBalance();
+        return $currency->getBalance() . " " . $nameCurrency;
+    }
+
+    public function transferToBalance(Currency $currency)
+    {
+        $existCurrency = $this->getCurrency($currency->getName());
+
+        if (!$existCurrency) {
+            throw new \Exception();
+        }
+
+        $currency->topUpYourBalance();
+    }
+
+    public function deductFromBalance(Currency $currency)
+    {
+        if (!$this->getCurrency($currency->getName())) {
+            throw new \Exception();
+        }
+
+        $currency->deductFromBalance();
+
+        return $currency;
     }
 }
