@@ -68,6 +68,22 @@ class Db
     public function getRow($table, $sql = '', $params = [])
     {
         $result = $this->query("SELECT * FROM $table" . $sql, $params);
-        return $result[0];
+        if (isset($result[0])) {
+            return $result[0];
+        }
+        return NULL;
+    }
+
+    /**
+     * Возвращает id последней вставленной записи
+     * @return string
+     */
+
+    /**
+     * @return int
+     */
+    public function get_last_insert_id(): int
+    {
+        return (int)$this->db->lastInsertId();
     }
 }

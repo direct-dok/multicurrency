@@ -2,12 +2,14 @@
 
 namespace App\Account;
 
-class Account
-{
-    protected $name = 'Account 1';
+use App\Account\AccountInterface;
 
-    public function get_name()
+class Account implements AccountInterface
+{
+    private $name;
+
+    public function create()
     {
-        return $this->name;
+        // TODO: Implement create() method.
     }
 }
