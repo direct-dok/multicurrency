@@ -4,19 +4,48 @@ namespace App\Currency;
 
 use App\Traits\Exchanger;
 
+/**
+ * Абстрактный класс выбран потому как у нас могут быть еще допустим криптовалюты со своими особенностями реализации
+ */
 abstract class Currency
 {
     use Exchanger;
 
+    const STATUS_OFF = 'off';
+    const STATUS_ON = 'on';
+
+    protected $status;
+
+    /**
+     * Название валюты
+     * @var
+     */
     protected $name;
+
+    /**
+     * Баланс
+     * @var int
+     */
     protected $balance = 0;
+
+    /**
+     * Курсы обмена.
+     * TODO На самом деле, кривовато их здесь хранить, надо отдельную сущность под это делать, потому что нарушается Single Responsibility. Обменник должен быть отдельно
+     * @var array
+     */
     protected $exchangeRate = [];
+
+    /**
+     * Здесь храним сумму транзакции
+     * @var null
+     */
     protected $preparedForTransaction = null;
-    protected $writeOffTransactionAmount = null;
+
 
     public function __construct($name)
     {
         $this->name = $name;
+        $this->status = self::STATUS_ON;
     }
 
     /**
@@ -55,6 +84,11 @@ abstract class Currency
         return $_depositAmount;
     }
 
+    /**
+     * Списываем с баланса
+     * @return null
+     * @throws \Exception
+     */
     public function deductFromBalance()
     {
         if ($this->preparedForTransaction > $this->balance) {
@@ -69,11 +103,20 @@ abstract class Currency
         return $_amountDebited;
     }
 
+    /**
+     * Получить название валюты
+     * @return mixed
+     */
     public function getName()
     {
         return $this->name;
     }
 
+    /**
+     * Сетим сумму для транзакции
+     * @param $amount
+     * @return $this
+     */
     public function __invoke($amount)
     {
         $this->preparedForTransaction = $amount;
@@ -109,25 +152,20 @@ abstract class Currency
         return 'convert' . ucfirst($from) . 'To' . ucfirst($where);
     }
 
-
-    // Неиспользуемые методы
-    // Неиспользуемые методы
-
-    public function writeOffTransaction($amount)
+    /**
+     * Отключаем валюту. Перед отключением нужно проверять, не осталось ли на балансе денежных средств. Запрещать отключать если есть деньги на балансе
+     */
+    public function disable()
     {
-        if ($amount > $this->balance) {
-            throw new \Exception();
-        }
-
-        $this->writeOffTransactionAmount = $amount;
-        return $this;
+        $this->status = self::STATUS_OFF;
     }
 
-    public function commitOffTransaction()
+    /**
+     * Получаем статус
+     * @return string
+     */
+    public function getStatus()
     {
-        $this->deductFromBalance($this->writeOffTransactionAmount);
-        $amountDebited = $this->writeOffTransactionAmount;
-        $this->writeOffTransactionAmount = null;
-        return $amountDebited;
+        return $this->status;
     }
 }

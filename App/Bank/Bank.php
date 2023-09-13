@@ -17,8 +17,22 @@ class Bank implements BankInterface
      */
     const OPERATION_ENROLLMENT = 'enrollment';
 
+    /**
+     * Название аккаунта
+     * @var
+     */
     private $accountName;
+
+    /**
+     * Массив объектов валют
+     * @var array
+     */
     private $currencies = [];
+
+    /**
+     * Название главной валюты
+     * @var
+     */
     protected $mainCurrency;
 
     /**
@@ -30,43 +44,93 @@ class Bank implements BankInterface
      */
     protected $transactionLog = [];
 
+    /**
+     * Создать новый аккаунт. Если честно не понял зачем через метод создавать, наверное есть какой то смысл, но по идее можно все в конструкторе создать
+     * @param $name
+     * @return $this
+     */
     public function openNewAccount($name)
     {
         $this->accountName = $name;
         return $this;
     }
 
+    /**
+     * Получить список поддерживаемых валют
+     * @return string
+     */
     public function listSupportedCurrencies()
     {
-        $namesCurrencies = array_keys($this->currencies);
-        echo '[' . implode(', ', $namesCurrencies) . ']';
+        $_supportedCurrencies = [];
+
+        foreach ($this->currencies as $currency) {
+            if ($currency->getStatus() == Currency::STATUS_ON) {
+                $_supportedCurrencies[] = $currency->getName();
+            }
+        }
+        return '[' . implode(', ', $_supportedCurrencies) . '] <br>';
     }
 
+    /**
+     * Добавляем валюту
+     * @param Currency $currency
+     */
     public function addCurrency(Currency $currency)
     {
         $this->currencies[$currency->getName()] = $currency;
     }
 
-    public function getCurrency($nameCurrency)
+    /**
+     * Возвращает объект валюты
+     * @param $nameCurrency
+     * @return Currency
+     */
+    public function getCurrency($nameCurrency) : Currency
     {
         return $this->currencies[$nameCurrency];
     }
 
+    /**
+     * Устаовить основную валюту счета
+     * @param string $nameCurrency
+     */
     public function setMainCurrency(string $nameCurrency)
     {
         $this->mainCurrency = $nameCurrency;
     }
 
+    /**
+     * Получить название основной валюты счета
+     * @return mixed
+     */
     public function getMainCurrency()
     {
         return $this->mainCurrency;
     }
 
+    /**
+     * Отключить валюту и сконвертировать остаток по счету в основную валюту счета, с зачислением на баланс
+     * @param string $nameCurrency
+     */
     public function disableCurrency(string $nameCurrency)
     {
+        $_disableCurrency = $this->getCurrency($nameCurrency);
+        $_mainCurrencyAccount = $this->getCurrency($this->getMainCurrency());
 
+        $_disableCurrencyBalance = $_disableCurrency->getBalance();
+
+        $cash = $this->deductFromBalance($_disableCurrency($_disableCurrencyBalance));
+        $this->transferToBalance($_mainCurrencyAccount($cash));
+
+        $_disableCurrency->disable();
     }
 
+    /**
+     * Получить баланс
+     * @param null $nameCurrency
+     * @return string
+     * @throws \Exception
+     */
     public function getBalance($nameCurrency = null)
     {
         $_currency = null;

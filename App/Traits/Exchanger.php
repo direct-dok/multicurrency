@@ -14,6 +14,18 @@ trait Exchanger
         $this->preparedForTransaction = round($_convertSum / $courseExchange, 2);
     }
 
+    public function convertEurToRub($courseExchange)
+    {
+        $_convertSum = $this->preparedForTransaction;
+        $this->preparedForTransaction = round($_convertSum * $courseExchange, 2);
+    }
+
+    public function convertUsdToRub($courseExchange)
+    {
+        $_convertSum = $this->preparedForTransaction;
+        $this->preparedForTransaction = round($_convertSum * $courseExchange, 2);
+    }
+
     /**
      * TODO здесь реализовываем функции конвертирования зачисляемой валюты ....
      */
