@@ -43,7 +43,13 @@ echo $account->getBalance() . "<br>";
 
 $cash = $account->deductFromBalance($rub(1000));
 //
-//$account->transferToBalance($eur($cash));
+$account->transferToBalance($eur($cash));
+
+echo $account->getBalance() . "<br>";
+$eur->setExchangeRate(Currency::RUB, 120);
+echo $account->getBalance() . "<br>";
+$account->setMainCurrency(Currency::RUB);
+echo $account->getBalance() . "<br>";
 
 echo "<pre>";
 var_dump($account);
